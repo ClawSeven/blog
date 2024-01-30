@@ -9,3 +9,5 @@
 ## TEE
 
 1. [Occlum 异步网络框架 - IO_Uring 实践](https://github.com/ClawSeven/blog/blob/main/articles/occlum_async_network_io_uring.md)
+
+2. [SGX SDK 动态内存管理](https://github.com/ClawSeven/blog/blob/main/articles/sgx_sdk_emm.md)
