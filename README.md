@@ -5,6 +5,7 @@
 ## Rust
 1. [Rust 高阶类型 HKT](https://github.com/ClawSeven/blog/blob/main/articles/rust_hkt_gat.md)
 2. [Rustc 编译器行为导致了嵌套锁！](https://github.com/ClawSeven/blog/blob/main/articles/rust_nested_lock.md)
+3. [如何保证 Rust Panic Safety](https://github.com/ClawSeven/blog/blob/main/articles/rust_panic_safety.md)
 
 ## TEE
 
