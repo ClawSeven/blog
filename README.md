@@ -1,11 +1,11 @@
 # Clawseven 博客
-随笔: 记录一些遇到的有趣技术，督促自己好好写文档！
+**原创**随笔: 记录一些遇到的有趣技术，督促自己好好写文档！引用请标明出处
 
 -----
 ## Rust
 1. [Rust 高阶类型 HKT](https://github.com/ClawSeven/blog/blob/main/articles/rust_hkt_gat.md)
 2. [Rustc 编译器行为导致了嵌套锁！](https://github.com/ClawSeven/blog/blob/main/articles/rust_nested_lock.md)
-3. [如何保证 Rust Panic Safety](https://github.com/ClawSeven/blog/blob/main/articles/rust_panic_safety.md)
+3. [Rust 中如何保证 Panic Safety](https://github.com/ClawSeven/blog/blob/main/articles/rust_panic_safety.md)
 
 ## TEE
 
