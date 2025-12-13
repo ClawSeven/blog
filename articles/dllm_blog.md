@@ -16,7 +16,9 @@
 
 # Preview
 
-![](https://intranetproxy.alipay.com/skylark/lark/0/2025/png/125185/1764734256917-c310fdee-85fc-46d9-b5b0-61d196859bc6.png)
+<div align="center">
+  <img src="../images/ant_sgl_dllm.drawio.png" />
+</div>
 
 # TL;DR
 
