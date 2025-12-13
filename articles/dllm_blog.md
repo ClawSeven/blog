@@ -1,4 +1,5 @@
 
+
 1. TLDR: 我们干了啥，有啥效果；
 
 2. 技术背景：我们研究的事情是什么，为什么要做这件事情；这件事情的难点是什么；
@@ -55,6 +56,7 @@ Based on our observations of the current developments in DLM, we have identified
 
 - Due to the enormous computational cost of **Bidirectional Attention Diffusion** and its inefficient utilization of the KV Cache, mainstream Diffusion Language Models are increasingly moving toward the **Block-wise Diffusion** architecture.
 - The computation pattern of **Block-wise Diffusion** bears a high degree of similarity to SGLang's existing **Chunked-Prefill** process.
+- Unlike auto-regressive language models, diffusion language models utilize various decoding strategies, which require a **dedicated interface for flexible decoding algorithm customization**.
 
 ### Design:
 
@@ -115,6 +117,7 @@ python3 -m sglang.launch_server \
   --host 0.0.0.0 \
   --port 30000
 ```
+> NOTE: Use `--dllm-algorithm-config` for advanced configuration of the selected `--dllm-algorithm`. This feature decouples configuration from code, enabling flexible customization and argument passing for user-defined algorithms via a unified entry point.
 
 ### Example Client Code Snippet
 
@@ -191,20 +194,22 @@ The current implementation fully supports the following critical serving feature
 - [x] **Tensor Parallelism (TP)** support
 - [x] **CUDA Graph** optimization
 
+<!-- 
 ### TODOs:
 
 - [x] Model accuracy verification (WIP)
 - [ ] Refactor core logic to better align with the original auto-regressive process.
 - [x] Implement batching support utilizing CUDA graphs.
 - [x] Integrate additional common diffusion decoding strategies/algorithms.
-
+- [ ]  -->
 ### Mid & Long-term Roadmaps
 
-- [ ] Support overlap scheduling
-- [ ] Support speculative decoding in diffusion language model
-- [ ] Add compatibility for non-block-wise diffusuion models (e.g., LLaDA & RND1)
-- [ ] Based on the latest mature diffusion algorithm to implement the dlm iteratively
+- [ ] Support more system optimizations that autoregressive language models already have (e.g., speculative decoding)
+- [ ] Integrate additional common diffusion decoding strategies/algorithms
+- [ ] Add compatibility for non-block-wise diffusion models (e.g., LLaDA & RND1)
 
+
+### 
 
 # Appendix
 
