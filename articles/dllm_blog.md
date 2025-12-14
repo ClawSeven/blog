@@ -1,40 +1,32 @@
 
+# Designing the Diffusion LLM Framework in SGLang: Day 0 Support for the 100B LLaDA2
 
-1. TLDR: 我们干了啥，有啥效果；
+## Preview
 
-2. 技术背景：我们研究的事情是什么，为什么要做这件事情；这件事情的难点是什么；
-
-3. 架构设计；可以有一些伪代码；
-
-4. 实现效果；
-
-5. 具体使用方法；用户如何安装 + 迁移 + 使用；
-
-6. 未来计划；
-
-7. 工程附录；（把实现起来很花了精力 + 学到了很多东西的地方简单分享下）
-
-
-# Preview
+只是先放个图
 
 <div align="center">
   <img src="../images/ant_sgl_dllm.drawio.png" />
 </div>
 
-# TL;DR
+## TL;DR
+
+
+
+
 
 这篇 Blog 展示了
 
 
 
-# Background
+## Background
 
 
 Earlier this year, **LLaDA** made its debut as the **first Diffusion Language Model (DLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models. Furthermore, as we continued to scale up the size of our Diffusion models, the corresponding improvement in model performance reinforced our commitment to pursuing a path toward even larger models.
 
 However, in the process of scaling up DLM parameters, **we** **encountered a series of serious engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
 
-## Challenges
+### Challenges
 
 The current inference engines available for Diffusion models are **insufficient to support the evaluation and RL post-training requirements of larger-scale DLMs**. For instance, tools like **fast-dllm** are excellent research tools, better suited for algorithm researchers to tune and validate various Diffusion decoding algorithms. However, they fall short in providing **production-ready serving capabilities**, struggling to support crucial engineering needs such as **batching**, **scheduling**, **RL ecosystem integration**, and **parallelism**.
 
@@ -46,9 +38,9 @@ In contrast, **SGLang** is one of the most popular LLM inference engines today, 
 
 **However, the core issue is that SGLang currently only supports the Auto-Regressive calculation paradigm, and has not yet adapted to the Diffusion calculation method.**
 
-Therefore, the challenge we face is: **How can we cleverly introduce support for the Diffusion Language Model within the existing SGLang framework without compromising its current architecture?** The goal is two-fold: allow DLMs to benefit from all the optimization advantages SGLang offers, while **avoiding major, compromising modifications** to the SGLang framework just to accommodate Diffusion computation.
+Therefore, the challenge we face is: **How can we introduce support for the Diffusion Language Model within the existing SGLang framework without compromising its current architecture?** The goal is two-fold: allow DLMs to benefit from all the optimization advantages SGLang offers, while **avoiding major, compromising modifications** to the SGLang framework just to accommodate Diffusion computation.
 
-# Design
+## Design
 
 ### Key Insights:
 
@@ -58,29 +50,27 @@ Based on our observations of the current developments in DLM, we have identified
 - The computation pattern of **Block-wise Diffusion** bears a high degree of similarity to SGLang's existing **Chunked-Prefill** process.
 - Unlike auto-regressive language models, diffusion language models utilize various decoding strategies, which require a **dedicated interface for flexible decoding algorithm customization**.
 
-### Design:
+### Architecture:
 
-Our approach is to **cleverly leverage SGLang’s existing Chunked-Prefill pipeline** to implement computational support for **Block-wise Diffusion** models. This method allows us to seamlessly integrate DLM into the SGLang ecosystem **without changing the core SGLang framework**, enabling DLM to directly benefit from all the inference optimization techniques SGLang has accumulated.
-
-#### Architecture:：
+Our approach is to **leverage SGLang’s existing Chunked-Prefill pipeline** to implement computational support for **Block-wise Diffusion** models. This method allows us to seamlessly integrate DLM into the SGLang ecosystem **without changing the core SGLang framework**, enabling DLM to directly benefit from all the inference optimization techniques SGLang has accumulated.
 
 ![](https://intranetproxy.alipay.com/skylark/lark/0/2025/png/20857072/1762249287240-63d8cac1-18ca-464c-b409-9f039fce1ef2.png)
 
 
-As illustrated in the diagram, our modifications to the SGLang framework are very restrained, barely touching its core. **SGLang's original** `**generate request**` **execution flow remains unchanged.** Our implementation primarily focuses on leveraging and modifying its existing **Chunked Prefill** mechanism, with the specific work concentrated on two critical components: the `**prefill adder**` and `**chunked reqs**`.
+As illustrated in the diagram, our modifications to the SGLang framework are very restrained, barely touching its core. **SGLang's original** `generate request` **execution flow remains unchanged.** Our implementation primarily focuses on leveraging and modifying its existing **Chunked Prefill** mechanism, with the specific work concentrated on two critical components: the `prefill adder` and `chunked reqs`.
 
 In SGLang, the initial purpose of Chunked Prefill was to maximize GPU utilization. Consequently, the size of a single chunk is typically set quite large—ranging from 2K to 16K tokens in sequence length, depending on the GPU model. When the sequence is long enough, it naturally processes **only one request**, which is how the current `prefill adder` and `chunked req` are implemented.
 
-However, the decoding process for Diffusion models differs: it segments the sequence length at the **Block level**. Taking LLaDA-2 as an example, its Block Size is 32 tokens. If we were to follow SGLang's previous logic of 'processing only one large request at a time,' GPU performance would clearly be wasted. Therefore, **batching** is a crucial problem that must be solved. To achieve efficient batching, we modified both `**chunked reqs**` and the `**prefill adder**` to enable them to process multiple Diffusion Blocks within a single computation cycle.
+However, the decoding process for Diffusion models differs: it segments the sequence length at the **Block level**. Taking LLaDA-2 as an example, its Block Size is 32 tokens. If we were to follow SGLang's previous logic of 'processing only one large request at a time,' GPU performance would clearly be wasted. Therefore, **batching** is a crucial problem that must be solved. To achieve efficient batching, we modified both `chunked reqs` and the `prefill adder` to enable them to process multiple Diffusion Blocks within a single computation cycle.
 
 Furthermore, at the actual decoding execution level, we **inserted an abstraction layer for the Diffusion algorithm** between the **TP Worker (Tensor Parallel worker)** and the **Model Runner (model executor)**.
 
 Specifically:
 - If the Worker identifies that it is handling a Diffusion model, the execution flow enters this dedicated branch.
-- The TP Worker then calls the Diffusion algorithm's `**run**` function.
+- The TP Worker then calls the Diffusion algorithm's `run` function.
 - Internally, this algorithm utilizes a **forward iteration loop** to continuously drive the Model Runner to perform inference computations until the **entire Block (e.g., all 32 tokens) is decoded.**
 
-#### Casual Mask
+### Casual Mask
 
 ![](https://intranetproxy.alipay.com/skylark/lark/0/2025/png/20857072/1762244767456-6c88b3dd-4234-4030-9011-69bd695ac52a.png)
 
@@ -105,7 +95,7 @@ Simply put, if we visualize the attention mask as a geometric shape for the Q_cu
 
 ![](https://intranetproxy.alipay.com/skylark/lark/0/2025/gif/20857072/1762327158362-0f27688f-6cf8-410f-8bea-08d9605f2079.gif)
 
-# How to Use
+## How to Use
 
 ### Example Launch Command
 
@@ -168,18 +158,21 @@ curl -X POST "http://127.0.0.1:30000/generate" \
     }'
 ```
 
-# Performance
+## Performance
 
 ![LLaDA2.0-flash main results](../images/llada-model.png "LLaDA2.0-flash main results")
 
 ![LLaDA2.0-flash performance](../images/llada-performance.png "LLaDA2.0-flash performance")
 
 
-# Industrial Practice
+## Industrial Practice
 
 
 
-# Roadmap
+
+
+
+## Roadmap
 
 ### Implemented key features
 
@@ -220,7 +213,7 @@ The current implementation fully supports the following critical serving feature
 
 # Acknowledgements
 
-- Ant Group DeepXPU Team:
-- Ant Group Theta Team:
+- Ant Group DeepXPU Team: Zehuan Li, Tiwei Bie, Zhonghui Jiang, Yusong Gao, Mingliang Gong, Jianfeng Tan
+- Ant Group inclusionAI Team: Kun Chen, Zenan Huang, Lin Liu, Fuyuan Chen, Lun Du, Da Zheng 
 - SGLang dLLM Team: 
 - Nvidia Fast-dllm Team:
