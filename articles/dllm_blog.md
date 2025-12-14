@@ -205,7 +205,7 @@ The current implementation fully supports the following critical serving feature
 ### Mid & Long-term Roadmaps
 
 - [ ] Support more system optimizations that autoregressive language models already have (e.g., speculative decoding)
-- [ ] Integrate additional common diffusion decoding strategies/algorithms (e.g, fast-dllm v2[2])
+- [ ] Integrate additional common diffusion decoding strategies/algorithms (e.g, Fast-dLLM v2[2])
 - [ ] Add compatibility for non-block-wise diffusion models (e.g., LLaDA & RND1)
 
 ### 
@@ -220,7 +220,7 @@ The current implementation fully supports the following critical serving feature
 
 [1] LLaDA 2: [technique report](https://github.com/inclusionAI/LLaDA2.0/blob/main/tech_report.pdf)
 
-[2] Fast-dllm v2: [technique report](https://arxiv.org/pdf/2509.26328)
+[2] Fast-dLLM v2: [technique report](https://arxiv.org/pdf/2509.26328)
 
 
 # Acknowledgements
@@ -228,4 +228,7 @@ The current implementation fully supports the following critical serving feature
 - Ant Group DeepXPU Team:
 - Ant Group Theta Team:
 - SGLang dLLM Team: 
-- Nvidia Fast-dllm Team:
+- NVIDIA Fast-dLLM Team: [Chengyue Wu](https://hills-code.github.io/), [Hao Zhang](https://research.nvidia.com/person/hao-zhang), [Enze Xie](https://xieenze.github.io/), [Song Han](https://hanlab.mit.edu/songhan)
+
+# Learn more
+- [Roadmap for 2025-Q4 and 2026-Q1](https://github.com/sgl-project/sglang/issues/14199)
