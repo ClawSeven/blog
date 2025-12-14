@@ -169,8 +169,12 @@ curl -X POST "http://127.0.0.1:30000/generate" \
 <p align="center">
   <img src="../images/llada-performance.png" alt="LLaDA2.0-flash performance">
   <br>
-  <em> LLaDA2.0-flash performance in SGLang</em>
+  <em> LLaDA2.0-flash performance in SGLang. Average score and tokens-per-forward (TPF) for LLaDA2.0-flash with and without Confidence-Aware Parallel(CAP) training across 12 benchmarks. Inference speed (tokens per second) of LLaDA2.0-flash compared with similarly sized AR models on 4 code and math benchmarks</em>
 </p>
+
+We compared the average inference throughput (TPS) of LLaDA2.0-flash models against  AR baselines (Ling-flash-2.0 and Qwen3-30B-A3B-Instruct-2507) on HumanEval, MBPP, GSM8K, and CRUXEval. All models were served using **SGLang** for a fair comparison.
+
+With a 0.95 threshold decoder, LLaDA2.0-flash-CAP achieved 535 TPS, significantly outperforming standard LLaDA2.0-flash (383 TPS) and delivering up to a 2.1× speedup over AR baselines (256 TPS and 237 TPS). This demonstrates that **diffusion LLMs can surpass AR models in inference speed within the SGLang framework.**
 
 
 ## Industrial Practice
