@@ -1,5 +1,5 @@
 
-# Designing the Diffusion LLM Framework in SGLang: Day 0 Support for the 100B LLaDA2
+# Designing the Diffusion LLM Framework in SGLang: Day0 Support for the 100B LLaDA2
 
 ## Preview
 
@@ -11,20 +11,17 @@
 
 ## TL;DR
 
-
-
-
-
-这篇 Blog 展示了
-
+This blog post demonstrates how we designed and implemented support for Diffusion LLMs within the SGLang framework. By leveraging SGLang's existing Chunked-Prefill mechanism, we successfully integrated Block-wise Diffusion models into the SGLang ecosystem without altering its core framework, enabling Diffusion LLMs to directly benefit from all the inference optimization techniques accumulated by SGLang.
 
 
 ## Background
 
 
-Earlier this year, **LLaDA**[0] made its debut as the **first Diffusion Language Model (DLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models. Furthermore, as we continued to scale up the size of our Diffusion models, the corresponding improvement in model performance reinforced our commitment to pursuing a path toward even larger models.
+Earlier this year, **LLaDA**[0] made its debut as the **first Diffusion Language Model (dLLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models.
 
-However, in the process of scaling up DLM parameters[1], **we** **encountered a series of serious engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
+At the same time, as the parameter scale of dLLM models continues to grow, we have also observed scaling-law effects similar to those seen in AR models. In pursuit of better dLLMs, we trained the 100B-scale **LLaDA2.0-flash**[1] model.
+
+However, in the process of training the 100B-scale **LLaDA2.0-flash**[1] model, **we** **encountered a series of serious AI infrastructure engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
 
 ### Challenges
 
@@ -38,13 +35,13 @@ In contrast, **SGLang** is one of the most popular LLM inference engines today, 
 
 **However, the core issue is that SGLang currently only supports the Auto-Regressive calculation paradigm, and has not yet adapted to the Diffusion calculation method.**
 
-Therefore, the challenge we face is: **How can we introduce support for the Diffusion Language Model within the existing SGLang framework without compromising its current architecture?** The goal is two-fold: allow DLMs to benefit from all the optimization advantages SGLang offers, while **avoiding major, compromising modifications** to the SGLang framework just to accommodate Diffusion computation.
+Therefore, the challenge we face is: **How can we introduce support for the Diffusion Language Model within the existing SGLang framework without compromising its current architecture?** The goal is two-fold: allow dLLMs to benefit from all the optimization advantages SGLang offers, while **avoiding major, compromising modifications** to the SGLang framework just to accommodate Diffusion computation.
 
 ## Design
 
 ### Key Insights:
 
-Based on our observations of the current developments in DLM, we have identified several key insights:
+Based on our observations of the current developments in dLLM, we have identified several key insights:
 
 - Due to the enormous computational cost of **Bidirectional Attention Diffusion** and its inefficient utilization of the KV Cache, mainstream Diffusion Language Models are increasingly moving toward the **Block-wise Diffusion** architecture.
 - The computation pattern of **Block-wise Diffusion** bears a high degree of similarity to SGLang's existing **Chunked-Prefill** process.
@@ -52,7 +49,7 @@ Based on our observations of the current developments in DLM, we have identified
 
 ### Architecture:
 
-Our approach is to **leverage SGLang’s existing Chunked-Prefill pipeline** to implement computational support for **Block-wise Diffusion** models. This method allows us to seamlessly integrate DLM into the SGLang ecosystem **without changing the core SGLang framework**, enabling DLM to directly benefit from all the inference optimization techniques SGLang has accumulated.
+Our approach is to **leverage SGLang’s existing Chunked-Prefill pipeline** to implement computational support for **Block-wise** dLLMs. This method allows us to seamlessly integrate dLLM into the SGLang ecosystem **without changing the core SGLang framework**, enabling DLM to directly benefit from all the inference optimization techniques SGLang has accumulated.
 
 ![](https://intranetproxy.alipay.com/skylark/lark/0/2025/png/20857072/1762249287240-63d8cac1-18ca-464c-b409-9f039fce1ef2.png)
 
@@ -61,7 +58,7 @@ As illustrated in the diagram, our modifications to the SGLang framework are ver
 
 In SGLang, the initial purpose of Chunked Prefill was to maximize GPU utilization. Consequently, the size of a single chunk is typically set quite large—ranging from 2K to 16K tokens in sequence length, depending on the GPU model. When the sequence is long enough, it naturally processes **only one request**, which is how the current `prefill adder` and `chunked req` are implemented.
 
-However, the decoding process for Diffusion models differs: it segments the sequence length at the **Block level**. Taking LLaDA-2 as an example, its Block Size is 32 tokens. If we were to follow SGLang's previous logic of 'processing only one large request at a time,' GPU performance would clearly be wasted. Therefore, **batching** is a crucial problem that must be solved. To achieve efficient batching, we modified both `chunked reqs` and the `prefill adder` to enable them to process multiple Diffusion Blocks within a single computation cycle.
+However, the decoding process for Diffusion models differs: it segments the sequence length at the **Block level**. Taking LLaDA-2 as an example, its Block Size is 32 tokens. If we were to follow SGLang's previous logic of processing only one large request at a time, GPU performance would clearly be wasted. Therefore, **batching** is a crucial problem that must be solved. To achieve efficient batching, we modified both `chunked reqs` and the `prefill adder` to enable them to process multiple Diffusion Blocks within a single computation cycle.
 
 Furthermore, at the actual decoding execution level, we **inserted an abstraction layer for the Diffusion algorithm** between the **TP Worker (Tensor Parallel worker)** and the **Model Runner (model executor)**.
 
@@ -92,6 +89,8 @@ Simply put, if we visualize the attention mask as a geometric shape for the Q_cu
 - The calculation for **Block Diffusion** (Bidirectional Attention) corresponds to a **rectangular** mask.
 
 ## Streaming output animation
+
+SGLang dLLM supports streaming output just like SGLang Auto-Regressive models: but it outputs one Block (e.g., 32 tokens) at a time instead of one token.
 
 ![](https://intranetproxy.alipay.com/skylark/lark/0/2025/gif/20857072/1762327158362-0f27688f-6cf8-410f-8bea-08d9605f2079.gif)
 
@@ -165,6 +164,12 @@ curl -X POST "http://127.0.0.1:30000/generate" \
   <em>LLaDA2.0-flash main results</em>
 </p>
 
+We evaluated the performance of LLaDA2.0-flash models and same-level Auto-Regressive (AR) baselines across 47 benchmarks.
+
+The overall results indicate that the LLaDA2.0 architecture is not only
+highly competitive, but also shows a promising trend of closing the performance gap with, and even
+surpassing, AR models in specific key areas.
+
 
 <p align="center">
   <img src="../images/llada-performance.png" alt="LLaDA2.0-flash performance">
@@ -175,13 +180,6 @@ curl -X POST "http://127.0.0.1:30000/generate" \
 We compared the average inference throughput (TPS) of LLaDA2.0-flash models against  AR baselines (Ling-flash-2.0 and Qwen3-30B-A3B-Instruct-2507) on HumanEval, MBPP, GSM8K, and CRUXEval. All models were served using **SGLang** for a fair comparison.
 
 With a 0.95 threshold decoder, LLaDA2.0-flash-CAP achieved 535 TPS, significantly outperforming standard LLaDA2.0-flash (383 TPS) and delivering up to a 2.1× speedup over AR baselines (256 TPS and 237 TPS). This demonstrates that **diffusion LLMs can surpass AR models in inference speed within the SGLang framework.**
-
-
-## Industrial Practice
-
-
-
-
 
 
 ## Roadmap
@@ -230,9 +228,9 @@ The current implementation fully supports the following critical serving feature
 
 # Acknowledgements
 
-- Ant Group DeepXPU Team: Zehuan Li, Tiwei Bie, Zhonghui Jiang, Yusong Gao, Mingliang Gong, Jianfeng Tan
+- Ant Group DeepXPU Team: [Zehuan Li](https://github.com/Clawseven), Tiwei Bie, Zhonghui Jiang, Yusong Gao, Mingliang Gong, Jianfeng Tan
 - Ant Group inclusionAI Team: Kun Chen, Zenan Huang, Lin Liu, Fuyuan Chen, Lun Du, Da Zheng 
-- SGLang dLLM Team: [Jinwei Yao](https://kivi-yao.github.io/), [Mick Qian](https://github.com/mickqian), [BBuf](https://github.com/BBuf), [Liangsheng Yin](https://www.lsyin.me/), [Chenyang Zhao](https://zhaochenyang20.github.io/Chayenne/)
+- SGLang dLLM Team: [Jinwei Yao](https://kivi-yao.github.io/), [Mick Qian](https://github.com/mickqian), [Liangsheng Yin](https://www.lsyin.me/), [BBuf](https://github.com/BBuf), [Chenyang Zhao](https://zhaochenyang20.github.io/Chayenne/)
 - NVIDIA Fast-dLLM Team: [Chengyue Wu](https://hills-code.github.io/), [Hao Zhang](https://research.nvidia.com/person/hao-zhang), [Enze Xie](https://xieenze.github.io/), [Song Han](https://hanlab.mit.edu/songhan)
 
 # Learn more
