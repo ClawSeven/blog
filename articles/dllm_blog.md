@@ -217,7 +217,9 @@ The current implementation fully supports the following critical serving feature
 
 # Reference
 [0] LLaDA 1: [technique report](https://arxiv.org/pdf/2502.09992)
+
 [1] LLaDA 2: [technique report](https://github.com/inclusionAI/LLaDA2.0/blob/main/tech_report.pdf)
+
 [2] Fast-dllm v2: [technique report](https://arxiv.org/pdf/2509.26328)
 
 
