@@ -159,10 +159,18 @@ curl -X POST "http://127.0.0.1:30000/generate" \
 ```
 
 ## Performance
+<p align="center">
+  <img src="../images/llada-model.png" alt="LLaDA2.0-flash main results">
+  <br>
+  <em>LLaDA2.0-flash main results</em>
+</p>
 
-![LLaDA2.0-flash main results](../images/llada-model.png "LLaDA2.0-flash main results")
 
-![LLaDA2.0-flash performance](../images/llada-performance.png "LLaDA2.0-flash performance")
+<p align="center">
+  <img src="../images/llada-performance.png" alt="LLaDA2.0-flash performance">
+  <br>
+  <em> LLaDA2.0-flash performance in SGLang</em>
+</p>
 
 
 ## Industrial Practice
@@ -220,7 +228,7 @@ The current implementation fully supports the following critical serving feature
 
 - Ant Group DeepXPU Team: Zehuan Li, Tiwei Bie, Zhonghui Jiang, Yusong Gao, Mingliang Gong, Jianfeng Tan
 - Ant Group inclusionAI Team: Kun Chen, Zenan Huang, Lin Liu, Fuyuan Chen, Lun Du, Da Zheng 
-- SGLang dLLM Team: 
+- SGLang dLLM Team: [Jinwei Yao](https://kivi-yao.github.io/), [Mick Qian](https://github.com/mickqian), [BBuf](https://github.com/BBuf), [Liangsheng Yin](https://www.lsyin.me/), [Chenyang Zhao](https://zhaochenyang20.github.io/Chayenne/)
 - NVIDIA Fast-dLLM Team: [Chengyue Wu](https://hills-code.github.io/), [Hao Zhang](https://research.nvidia.com/person/hao-zhang), [Enze Xie](https://xieenze.github.io/), [Song Han](https://hanlab.mit.edu/songhan)
 
 # Learn more
