@@ -22,9 +22,9 @@
 ## Background
 
 
-Earlier this year, **LLaDA** made its debut as the **first Diffusion Language Model (DLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models. Furthermore, as we continued to scale up the size of our Diffusion models, the corresponding improvement in model performance reinforced our commitment to pursuing a path toward even larger models.
+Earlier this year, **LLaDA**[0] made its debut as the **first Diffusion Language Model (DLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models. Furthermore, as we continued to scale up the size of our Diffusion models, the corresponding improvement in model performance reinforced our commitment to pursuing a path toward even larger models.
 
-However, in the process of scaling up DLM parameters, **we** **encountered a series of serious engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
+However, in the process of scaling up DLM parameters[1], **we** **encountered a series of serious engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
 
 ### Challenges
 
@@ -159,10 +159,22 @@ curl -X POST "http://127.0.0.1:30000/generate" \
 ```
 
 ## Performance
+<p align="center">
+  <img src="../images/llada-model.png" alt="LLaDA2.0-flash main results">
+  <br>
+  <em>LLaDA2.0-flash main results</em>
+</p>
 
-![LLaDA2.0-flash main results](../images/llada-model.png "LLaDA2.0-flash main results")
 
-![LLaDA2.0-flash performance](../images/llada-performance.png "LLaDA2.0-flash performance")
+<p align="center">
+  <img src="../images/llada-performance.png" alt="LLaDA2.0-flash performance">
+  <br>
+  <em> LLaDA2.0-flash performance in SGLang. Average score and tokens-per-forward (TPF) for LLaDA2.0-flash with and without Confidence-Aware Parallel(CAP) training across 12 benchmarks. Inference speed (tokens per second) of LLaDA2.0-flash compared with similarly sized AR models on 4 code and math benchmarks</em>
+</p>
+
+We compared the average inference throughput (TPS) of LLaDA2.0-flash models against  AR baselines (Ling-flash-2.0 and Qwen3-30B-A3B-Instruct-2507) on HumanEval, MBPP, GSM8K, and CRUXEval. All models were served using **SGLang** for a fair comparison.
+
+With a 0.95 threshold decoder, LLaDA2.0-flash-CAP achieved 535 TPS, significantly outperforming standard LLaDA2.0-flash (383 TPS) and delivering up to a 2.1× speedup over AR baselines (256 TPS and 237 TPS). This demonstrates that **diffusion LLMs can surpass AR models in inference speed within the SGLang framework.**
 
 
 ## Industrial Practice
@@ -198,9 +210,10 @@ The current implementation fully supports the following critical serving feature
 ### Mid & Long-term Roadmaps
 
 - [ ] Support more system optimizations that autoregressive language models already have (e.g., speculative decoding)
-- [ ] Integrate additional common diffusion decoding strategies/algorithms
+- [ ] Integrate additional common diffusion decoding strategies/algorithms (e.g, Fast-dLLM v2[2])
 - [ ] Add compatibility for non-block-wise diffusion models (e.g., LLaDA & RND1)
 
+### 
 
 ### 
 
@@ -208,12 +221,19 @@ The current implementation fully supports the following critical serving feature
 
 
 # Reference
+[0] LLaDA 1: [technique report](https://arxiv.org/pdf/2502.09992)
 
+[1] LLaDA 2: [technique report](https://github.com/inclusionAI/LLaDA2.0/blob/main/tech_report.pdf)
+
+[2] Fast-dLLM v2: [technique report](https://arxiv.org/pdf/2509.26328)
 
 
 # Acknowledgements
 
 - Ant Group DeepXPU Team: Zehuan Li, Tiwei Bie, Zhonghui Jiang, Yusong Gao, Mingliang Gong, Jianfeng Tan
 - Ant Group inclusionAI Team: Kun Chen, Zenan Huang, Lin Liu, Fuyuan Chen, Lun Du, Da Zheng 
-- SGLang dLLM Team: 
-- Nvidia Fast-dllm Team:
+- SGLang dLLM Team: [Jinwei Yao](https://kivi-yao.github.io/), [Mick Qian](https://github.com/mickqian), [BBuf](https://github.com/BBuf), [Liangsheng Yin](https://www.lsyin.me/), [Chenyang Zhao](https://zhaochenyang20.github.io/Chayenne/)
+- NVIDIA Fast-dLLM Team: [Chengyue Wu](https://hills-code.github.io/), [Hao Zhang](https://research.nvidia.com/person/hao-zhang), [Enze Xie](https://xieenze.github.io/), [Song Han](https://hanlab.mit.edu/songhan)
+
+# Learn more
+- [Roadmap for 2025-Q4 and 2026-Q1](https://github.com/sgl-project/sglang/issues/14199)
