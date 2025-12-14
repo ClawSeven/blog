@@ -30,9 +30,9 @@
 # Background
 
 
-Earlier this year, **LLaDA** made its debut as the **first Diffusion Language Model (DLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models. Furthermore, as we continued to scale up the size of our Diffusion models, the corresponding improvement in model performance reinforced our commitment to pursuing a path toward even larger models.
+Earlier this year, **LLaDA**[0] made its debut as the **first Diffusion Language Model (DLM)**, immediately capturing significant attention from both the academic and industrial communities. This achievement, a collaboration between **Renmin University of China** and **Ant Group**, demonstrated that the unique execution paradigm of Diffusion models exhibits **superior data comprehension capabilities** and enables **faster inference speeds** compared to Auto-Regressive models. Furthermore, as we continued to scale up the size of our Diffusion models, the corresponding improvement in model performance reinforced our commitment to pursuing a path toward even larger models.
 
-However, in the process of scaling up DLM parameters, **we** **encountered a series of serious engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
+However, in the process of scaling up DLM parameters[1], **we** **encountered a series of serious engineering challenges**. Key among these were the critical hurdles of **model evaluation performance** and providing robust support for **Reinforcement Learning (RL) post-training**.
 
 ## Challenges
 
@@ -205,7 +205,7 @@ The current implementation fully supports the following critical serving feature
 ### Mid & Long-term Roadmaps
 
 - [ ] Support more system optimizations that autoregressive language models already have (e.g., speculative decoding)
-- [ ] Integrate additional common diffusion decoding strategies/algorithms
+- [ ] Integrate additional common diffusion decoding strategies/algorithms (e.g, fast-dllm v2[2])
 - [ ] Add compatibility for non-block-wise diffusion models (e.g., LLaDA & RND1)
 
 
@@ -215,7 +215,9 @@ The current implementation fully supports the following critical serving feature
 
 
 # Reference
-
+[0] LLaDA 1: [technique report](https://arxiv.org/pdf/2502.09992)
+[1] LLaDA 2: [technique report](https://github.com/inclusionAI/LLaDA2.0/blob/main/tech_report.pdf)
+[2] Fast-dllm v2: [technique report](https://arxiv.org/pdf/2509.26328)
 
 
 # Acknowledgements
