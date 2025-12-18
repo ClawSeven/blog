@@ -11,7 +11,11 @@
 
 ## TL;DR
 
-This blog post demonstrates how we designed and implemented Diffusion Large Language Model (dLLM) framework in the SGLang. By leveraging SGLang's existing Chunked-Prefill mechanism, we successfully integrated Block Diffusion LLM into the SGLang ecosystem without altering its core framework, and also benefit from all the inference optimization techniques accumulated by SGLang. At the same time, it also provides flexibility in defining diffusion decoding algorithms.
+We are excited to introduce the design and implementation of the Diffusion Large Language Model (dLLM) framework within SGLang. By leveraging the existing Chunked-Prefill mechanism, our system achieves:
+
+- Seamless integration: We integrated Block Diffusion LLM into the SGLang ecosystem without altering its core framework.
+- Inherited optimization: The framework benefits from the inference optimization techniques accumulated by SGLang.
+- High flexibility: It retains full flexibility for users to define and customize diffusion decoding algorithms.
 
 ## Background
 
@@ -38,7 +42,7 @@ Therefore, the challenge we face is: How can we introduce support for the dLLMs 
 
 ## Design
 
-### Key Insights:
+### Key Insights
 
 Based on our observations of the current developments in dLLM, we have identified several key insights:
 
@@ -46,7 +50,7 @@ Based on our observations of the current developments in dLLM, we have identifie
 - The computation pattern of Block Diffusion bears a high degree of similarity to SGLang's existing Chunked-Prefill process.
 - Unlike auto-regressive language models, diffusion language models utilize various decoding strategies, which require a dedicated interface for flexible decoding algorithm customization.
 
-### Architecture:
+### Architecture
 
 Our approach is to leverage SGLang’s existing Chunked-Prefill pipeline to implement computational support for Block Diffusion LLM. This method allows us to seamlessly integrate dLLM into the SGLang ecosystem without changing the core SGLang framework, enabling dLLM to directly benefit from all the inference optimization techniques SGLang has accumulated.
 
@@ -96,7 +100,9 @@ Simply put, if we visualize the attention mask as a geometric shape for the Q_cu
 
 ## Streaming output animation
 
-Here is an animation comparing the streaming output of LLaDA2.0-flash (100B / BF16) against gpt-oss-120B(117B / MXFP4), while LLaDA2.0-flash is served by SGLang dLLM with TP8 on 8 * H20, and gpt-oss-120B is served by SGLang standard AR process with TP8 on 8 * H20.
+Here is an animation comparing the streaming output of LLaDA2.0-flash (100B / BF16) and gpt-oss-120B (117B / MXFP4). LLaDA2.0-flash is served using SGLang dLLM with TP8 on 8 × H20, while gpt-oss-120B is served using SGLang's standard AR process on the same hardware.
+
+Both models are asked to implement the quicksort algorithm in 10 programming languages — a task particularly well-suited for diffusion LLMs. As shown, LLaDA2.0-flash achieves significantly higher throughput at 935 tokens/s, compared to gpt-oss-120B (263 tokens/s) in this scenario.
 
 <p align="center">
   <img src="../images/llada2-vs-gpt-oss.gif" alt="LLaDA2.0-flash vs gpt-oss-120B animation">
@@ -188,12 +194,17 @@ The overall results indicate that the LLaDA2.0 architecture is not only highly c
 <p align="center">
   <img src="../images/llada2_despine_comparison.png" alt="LLaDA2.0-flash performance">
   <br>
-  <em> LLaDA2.0-flash performance in SGLang. Average score and tokens-per-forward (TPF) for LLaDA2.0-flash with and without Confidence-Aware Parallel(CAP) training across 12 benchmarks. Inference speed (tokens per second) of LLaDA2.0-flash compared with similarly sized AR models on 4 code and math benchmarks</em>
+  <em> LLaDA2.0-flash performance evaluated using SGLang </em>
 </p>
 
-We compared the average inference throughput (TPS) of LLaDA2.0-flash models against AR baselines (Ling-flash-2.0 and Qwen3-30B-A3B-Instruct-2507) on HumanEval, MBPP, GSM8K, and CRUXEval. All models were served using SGLang for a fair comparison.
+The chart presents two complementary measurements for LLaDA2.0‑flash:
+- Average score and tokens‑per‑forward (TPF) obtained with and without Confidence‑Aware Parallel (CAP) training across 12 benchmark tasks.
+- Inference speed (tokens per second) of LLaDA2.0‑flash, benchmarked against AR models of comparable size on HumanEval, MBPP, GSM8K, and CRUXEval suites.
+
+All numbers are collected under a consistent serving environment (SGLang with TP8 on H20), ensuring a fair comparison between the diffusion LLM and the Auto-Regressive baselines.
 
 With a 0.95 threshold decoder, LLaDA2.0-flash-CAP achieved 500 TPS, significantly outperforming standard LLaDA2.0-flash (383 TPS) and delivering up to a 1.9× speedup over AR baselines (258 TPS and 237 TPS) with small batch sizes.
+
 
 ## Roadmap
 
@@ -227,5 +238,5 @@ The current implementation fully supports the following critical serving feature
 
 - Ant Group DeepXPU Team: [Zehuan Li](https://github.com/Clawseven), [Tiwei Bie](https://github.com/btw616), Zhonghui Jiang, Jinghua Yao, Yusong Gao, [Mingliang Gong](https://github.com/brightcoder01), Jianfeng Tan
 - Ant Group inclusionAI Team: Kun Chen, Zenan Huang, Lin Liu, Fuyuan Chen, Lun Du, Da Zheng 
-- SGLang dLLM Team: [Jinwei Yao](https://kivi-yao.github.io/), [Mick Qian](https://github.com/mickqian), [Liangsheng Yin](https://www.lsyin.me/), [BBuf](https://github.com/BBuf), [Chenyang Zhao](https://zhaochenyang20.github.io/Chayenne/)
+- SGLang dLLM Team: [Jinwei Yao](https://kivi-yao.github.io/), [Mick Qian](https://github.com/mickqian), [Liangsheng Yin](https://www.lsyin.me/), [BBuf](https://github.com/BBuf), Banghua Zhu, [Chenyang Zhao](https://zhaochenyang20.github.io/Chayenne/)
 - NVIDIA Fast-dLLM Team: [Chengyue Wu](https://hills-code.github.io/), [Hao Zhang](https://research.nvidia.com/person/hao-zhang), [Enze Xie](https://xieenze.github.io/), [Song Han](https://hanlab.mit.edu/songhan)
